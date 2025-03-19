@@ -1,0 +1,28 @@
+# Verze docker-compose
+version: '3'
+
+# Definice služeb
+services:
+  # Název naší aplikace
+  app:
+    # Sestavení z lokálního Dockerfile
+    build: .
+    
+    # Mapování portů (lokální:kontejner)
+    ports:
+      - "3000:3000"
+    
+    # Mapování adresářů (pro vývoj)
+    volumes:
+      - .:/app                # Aktuální adresář do /app v kontejneru
+      - /app/node_modules     # Zachování node_modules v kontejneru
+    
+    # Proměnné prostředí
+    environment:
+      - NODE_ENV=development  # Vývojové prostředí
+    
+    # Příkaz pro spuštění aplikace (vývojový režim)
+    command: npm run start:dev
+    
+    # Automatický restart kontejneru
+    restart: unless-stopped

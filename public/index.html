@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extraktor výsledků vyhledávání Google</title>
+    <!-- Připojení CSS stylů -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Hlavní nadpis aplikace -->
+        <h1>Extraktor výsledků vyhledávání Google</h1>
+        
+        <!-- Vyhledávací formulář -->
+        <div class="search-container">
+            <!-- Vstupní pole pro hledaný výraz -->
+            <input type="text" id="search-input" placeholder="Zadejte hledaný výraz...">
+            <!-- Tlačítko pro vyhledávání -->
+            <button id="search-button">Vyhledat</button>
+        </div>
+        
+        <!-- Kontejner pro zobrazení výsledků (zpočátku skrytý) -->
+        <div class="results-container" id="results-container">
+            <!-- Informace o výsledcích (počet, dotaz) -->
+            <div id="results-info" class="results-info"></div>
+            <!-- Seznam výsledků -->
+            <div id="results-list" class="results-list"></div>
+            
+            <!-- Možnosti stažení výsledků -->
+            <div class="download-options">
+                <h3>Stáhnout výsledky</h3>
+                <!-- Tlačítka pro stažení v různých formátech -->
+                <button id="download-json">Stáhnout jako JSON</button>
+                <button id="download-csv">Stáhnout jako CSV</button>
+            </div>
+        </div>
+        
+        <!-- Indikátor načítání (zpočátku skrytý) -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Načítání výsledků vyhledávání...</p>
+        </div>
+        
+        <!-- Prostor pro zobrazení chybových zpráv (zpočátku skrytý) -->
+        <div id="error-message" class="error-message"></div>
+    </div>
+    
+    <!-- Připojení JavaScript kódu -->
+    <script src="app.js"></script>
+</body>
+</html>
