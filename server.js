@@ -116,5 +116,10 @@ app.listen(PORT, () => {
   console.log(`Server běží na portu ${PORT}`);
 });
 
+
+
 // Export pro testování
 module.exports = { app, scrapeGoogleResults };
+
+// pro export na Vercel
+module.exports = app;
