@@ -3,35 +3,25 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 
 module.exports = async (req, res) => {
-  // Nastavení CORS hlaviček
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  // Zpracování OPTIONS požadavku pro CORS preflight
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
   try {
-    // Získání dotazu z URL parametru
     const query = req.query.q;
     
-    // Kontrola, zda byl dotaz zadán
     if (!query) {
       return res.status(400).json({ error: 'Search query is required' });
     }
     
-    console.log(`Vyhledávání dotazu: ${query}`);
+    console.log(`Processing search query: ${query}`);
     
-    // Scraping výsledků z Google
     const results = await scrapeGoogleResults(query);
+    console.log(`Found ${results.count} results`);
     
-    // Odpověď s výsledky
     return res.status(200).json(results);
   } catch (error) {
-    console.error('Error during search:', error.message);
-    return res.status(500).json({ error: 'Failed to fetch search results' });
+    console.error('API Error:', error);
+    return res.status(500).json({ 
+      error: 'Failed to fetch search results',
+      details: error.message 
+    });
   }
 };
 
