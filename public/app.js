@@ -42,9 +42,16 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsContainer.style.display = 'none';
         
         try {
+<<<<<<< HEAD
             // Volání API na náš backend - pracuje s různými prostředími
             const apiUrl = `/api/search?q=${encodeURIComponent(query)}`;
             console.log('Volání API na:', apiUrl);
+=======
+            // Volání API na náš backend - pracuje s různými prostředími (Vercel/lokální)
+            const apiUrl = `/api/search?q=${encodeURIComponent(query)}`;
+            console.log('Calling API at:', apiUrl);
+            const response = await fetch(apiUrl);
+>>>>>>> 48e42021740198d3fd59d011d8ec160ce8496c73
             
             const response = await fetch(apiUrl);
             
@@ -82,7 +89,11 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } catch (error) {
             // Zpracování chyby
+<<<<<<< HEAD
             console.error('Chyba vyhledávání:', error);
+=======
+            console.error('Search error:', error);
+>>>>>>> 48e42021740198d3fd59d011d8ec160ce8496c73
             hideLoading();
             showError(error.message || 'Došlo k neočekávané chybě');
         }

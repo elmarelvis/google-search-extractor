@@ -22,6 +22,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Search query is required' });
     }
     
+<<<<<<< HEAD
     console.log(`Vyhledávání dotazu: ${query}`);
     
     // Scraping výsledků z Google
@@ -29,11 +30,20 @@ module.exports = async (req, res) => {
     
     // Odpověď s výsledky
     return res.status(200).json(results);
+=======
+    // Scraping výsledků z Google
+    const results = await scrapeGoogleResults(query);
+    return res.json(results);
+>>>>>>> 48e42021740198d3fd59d011d8ec160ce8496c73
   } catch (error) {
     console.error('Error during search:', error.message);
     return res.status(500).json({ error: 'Failed to fetch search results' });
   }
+<<<<<<< HEAD
 };
+=======
+}
+>>>>>>> 48e42021740198d3fd59d011d8ec160ce8496c73
 
 // Funkce pro scraping výsledků z Google
 async function scrapeGoogleResults(query) {
@@ -42,15 +52,22 @@ async function scrapeGoogleResults(query) {
     const headers = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36',
       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+<<<<<<< HEAD
       'Accept-Language': 'cs-CZ,cs;q=0.9,en-US;q=0.8,en;q=0.7',
+=======
+      'Accept-Language': 'en-US,en;q=0.5',
+>>>>>>> 48e42021740198d3fd59d011d8ec160ce8496c73
       'Referer': 'https://www.google.com/'
     };
 
     // Sestavení URL pro vyhledávání na Google
     const searchUrl = `https://www.google.com/search?q=${encodeURIComponent(query)}&hl=cs`;
     
+<<<<<<< HEAD
     console.log(`Volání Google URL: ${searchUrl}`);
     
+=======
+>>>>>>> 48e42021740198d3fd59d011d8ec160ce8496c73
     // Provedení HTTP požadavku na Google
     const response = await axios.get(searchUrl, { headers });
     
@@ -96,8 +113,11 @@ async function scrapeGoogleResults(query) {
       }
     });
     
+<<<<<<< HEAD
     console.log(`Nalezeno ${results.length} výsledků pro: ${query}`);
     
+=======
+>>>>>>> 48e42021740198d3fd59d011d8ec160ce8496c73
     // Vrácení strukturovaných výsledků
     return {
       query,                // Původní dotaz
