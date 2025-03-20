@@ -28,74 +28,38 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Funkce pro obsluhu vyhledávání
     async function handleSearch() {
-        const query = searchInput.value.trim();                         // Získání a očištění dotazu
+        const query = searchInput.value.trim();
         
-        // Kontrola, zda byl dotaz zadán
         if (!query) {
             showError('Zadejte prosím hledaný výraz');
             return;
         }
         
-        // Reset UI - příprava na nové vyhledávání
         hideError();
         showLoading();
         resultsContainer.style.display = 'none';
         
         try {
-<<<<<<< HEAD
-            // Volání API na náš backend - pracuje s různými prostředími
-            const apiUrl = `/api/search?q=${encodeURIComponent(query)}`;
-            console.log('Volání API na:', apiUrl);
-=======
-            // Volání API na náš backend - pracuje s různými prostředími (Vercel/lokální)
-            const apiUrl = `/api/search?q=${encodeURIComponent(query)}`;
-            console.log('Calling API at:', apiUrl);
-            const response = await fetch(apiUrl);
->>>>>>> 48e42021740198d3fd59d011d8ec160ce8496c73
-            
+            // Fix: Update API URL to work with both local and production environments
+            const apiUrl = window.location.hostname === 'localhost' 
+                ? `/api/search?q=${encodeURIComponent(query)}`
+                : `/api/search?q=${encodeURIComponent(query)}`;
+    
             const response = await fetch(apiUrl);
             
-            // Kontrola, zda byla odpověď úspěšná
             if (!response.ok) {
-                // Pokusíme se zpracovat chybovou odpověď jako JSON, ale může to být i HTML
-                try {
-                    const contentType = response.headers.get('content-type');
-                    if (contentType && contentType.includes('application/json')) {
-                        const errorData = await response.json();
-                        throw new Error(errorData.error || 'Nepodařilo se načíst výsledky vyhledávání');
-                    } else {
-                        // Když odpověď není JSON, přečteme ji jako text
-                        const errorText = await response.text();
-                        console.error('API vrátilo neplatnou odpověď:', errorText.substring(0, 100) + '...');
-                        throw new Error(`API chyba (${response.status}): Endpoint není dostupný`);
-                    }
-                } catch (parseError) {
-                    throw new Error(`Problém s API: ${response.status} ${response.statusText}`);
-                }
+                throw new Error(`API error: ${response.status}`);
             }
             
-            // Parsování odpovědi jako JSON
-            try {
-                searchResults = await response.json();
-                
-                // Zobrazení výsledků
-                displayResults(searchResults);
-                hideLoading();
-                resultsContainer.style.display = 'block';
-            } catch (jsonError) {
-                console.error('Chyba při parsování JSON:', jsonError);
-                throw new Error('Odpověď serveru není ve formátu JSON');
-            }
+            searchResults = await response.json();
+            displayResults(searchResults);
+            hideLoading();
+            resultsContainer.style.display = 'block';
             
         } catch (error) {
-            // Zpracování chyby
-<<<<<<< HEAD
-            console.error('Chyba vyhledávání:', error);
-=======
             console.error('Search error:', error);
->>>>>>> 48e42021740198d3fd59d011d8ec160ce8496c73
             hideLoading();
-            showError(error.message || 'Došlo k neočekávané chybě');
+            showError('Nepodařilo se načíst výsledky vyhledávání');
         }
     }
     
