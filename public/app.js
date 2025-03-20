@@ -14,13 +14,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // Proměnná pro uložení výsledků vyhledávání
     let searchResults = null;
     
-    // Přidání event listenerů - reakce na interakce uživatele
-    searchButton.addEventListener('click', handleSearch);               // Kliknutí na tlačítko vyhledat
-    searchInput.addEventListener('keypress', (e) => {                   // Stisknutí Enter v poli hledání
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
-    });
+    // Add this function before the event listeners
+    function displayResults(data) {
+        // Update results info
+        resultsInfo.textContent = `Nalezeno ${data.count} výsledků pro: "${data.query}"`;
+        
+        // Clear previous results
+        resultsList.innerHTML = '';
+        
+        // Create and append result items
+        data.results.forEach(result => {
+            const resultItem = document.createElement('div');
+            resultItem.className = 'result-item';
+            
+            resultItem.innerHTML = `
+                <a href="${result.url}" class="result-title" target="_blank">${result.title}</a>
+                <div class="result-url">${result.url}</div>
+                <div class="result-description">${result.description}</div>
+            `;
+            
+            resultsList.appendChild(resultItem);
+        });
+    }
     
     // Přidání event listenerů pro tlačítka stažení
     downloadJsonBtn.addEventListener('click', () => downloadResults('json')); // Stažení jako JSON
@@ -64,47 +79,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Funkce pro zobrazení výsledků vyhledávání
-    async function handleSearch() {
-        const query = searchInput.value.trim();
-        
-        if (!query) {
-            showError('Zadejte prosím hledaný výraz');
-            return;
-        }
-        
-        hideError();
-        showLoading();
-        resultsContainer.style.display = 'none';
-        
-        try {
-            // Fix: Use absolute URL for production environment
-            const apiUrl = window.location.hostname === 'localhost' 
-                ? `/api/search?q=${encodeURIComponent(query)}`
-                : `https://${window.location.host}/api/search?q=${encodeURIComponent(query)}`;
+async function handleSearch() {
+    const query = searchInput.value.trim();
     
-            const response = await fetch(apiUrl, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `API error: ${response.status}`);
-            }
-            
-            searchResults = await response.json();
-            displayResults(searchResults);
-            hideLoading();
-            resultsContainer.style.display = 'block';
-            
-        } catch (error) {
-            console.error('Search error:', error);
-            hideLoading();
-            showError('Nepodařilo se načíst výsledky vyhledávání');
-        }
+    if (!query) {
+        showError('Zadejte prosím hledaný výraz');
+        return;
     }
+    
+    hideError();
+    showLoading();
+    resultsContainer.style.display = 'none';
+    
+    try {
+        const apiUrl = window.location.hostname === 'localhost' 
+            ? `/api/search?q=${encodeURIComponent(query)}`
+            : `https://${window.location.host}/api/search?q=${encodeURIComponent(query)}`;
+
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error || `API error: ${response.status}`);
+        }
+        
+        searchResults = await response.json();
+        displayResults(searchResults);
+        hideLoading();
+        resultsContainer.style.display = 'block';
+        
+    } catch (error) {
+        console.error('Search error:', error);
+        hideLoading();
+        showError('Nepodařilo se načíst výsledky vyhledávání');
+    }
+}
     
     // Funkce pro stažení výsledků
     function downloadResults(format) {
