@@ -42,8 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsContainer.style.display = 'none';
         
         try {
-            // Volání API na náš backend
-            const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            // Volání API na náš backend - pracuje s různými prostředími (Vercel/lokální)
+            const apiUrl = `/api/search?q=${encodeURIComponent(query)}`;
+            console.log('Calling API at:', apiUrl);
+            const response = await fetch(apiUrl);
             
             // Kontrola, zda byl požadavek úspěšný
             if (!response.ok) {
@@ -61,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
         } catch (error) {
             // Zpracování chyby
+            console.error('Search error:', error);
             hideLoading();
             showError(error.message || 'Došlo k neočekávané chybě');
         }
@@ -125,7 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (format === 'json') {
             // Formátování jako JSON
             content = JSON.stringify(searchResults, null, 2);
-            filename = `google-search-${searchResults.query.replace(/\\s+/g, '-')}.json`;
+            filename = `google-search-${searchResults.query.replace(/\s+/g, '-')}.json`;
             type = 'application/json';
         } else if (format === 'csv') {
             // Formátování jako CSV
@@ -141,9 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }).join(',');
                 })
             ];
-            content = csvRows.join('\
-');
-            filename = `google-search-${searchResults.query.replace(/\\s+/g, '-')}.csv`;
+            content = csvRows.join('\n');
+            filename = `google-search-${searchResults.query.replace(/\s+/g, '-')}.csv`;
             type = 'text/csv';
         } else {
             showError('Neplatný formát pro stažení');
