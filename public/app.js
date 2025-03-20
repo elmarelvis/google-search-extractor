@@ -42,25 +42,47 @@ document.addEventListener('DOMContentLoaded', () => {
         resultsContainer.style.display = 'none';
         
         try {
-            // Volání API na náš backend
-            const response = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+            // Volání API na náš backend - pracuje s různými prostředími
+            const apiUrl = `/api/search?q=${encodeURIComponent(query)}`;
+            console.log('Volání API na:', apiUrl);
             
-            // Kontrola, zda byl požadavek úspěšný
+            const response = await fetch(apiUrl);
+            
+            // Kontrola, zda byla odpověď úspěšná
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Nepodařilo se načíst výsledky vyhledávání');
+                // Pokusíme se zpracovat chybovou odpověď jako JSON, ale může to být i HTML
+                try {
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || 'Nepodařilo se načíst výsledky vyhledávání');
+                    } else {
+                        // Když odpověď není JSON, přečteme ji jako text
+                        const errorText = await response.text();
+                        console.error('API vrátilo neplatnou odpověď:', errorText.substring(0, 100) + '...');
+                        throw new Error(`API chyba (${response.status}): Endpoint není dostupný`);
+                    }
+                } catch (parseError) {
+                    throw new Error(`Problém s API: ${response.status} ${response.statusText}`);
+                }
             }
             
-            // Parsování odpovědi
-            searchResults = await response.json();
-            
-            // Zobrazení výsledků
-            displayResults(searchResults);
-            hideLoading();
-            resultsContainer.style.display = 'block';
+            // Parsování odpovědi jako JSON
+            try {
+                searchResults = await response.json();
+                
+                // Zobrazení výsledků
+                displayResults(searchResults);
+                hideLoading();
+                resultsContainer.style.display = 'block';
+            } catch (jsonError) {
+                console.error('Chyba při parsování JSON:', jsonError);
+                throw new Error('Odpověď serveru není ve formátu JSON');
+            }
             
         } catch (error) {
             // Zpracování chyby
+            console.error('Chyba vyhledávání:', error);
             hideLoading();
             showError(error.message || 'Došlo k neočekávané chybě');
         }
@@ -87,10 +109,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const resultItem = document.createElement('div');
             resultItem.className = 'result-item';
             
-            // Vytvoření titulku výsledku
-            const resultTitle = document.createElement('div');
+            // Vytvoření titulku výsledku s odkazem
+            const resultTitle = document.createElement('a');
             resultTitle.className = 'result-title';
             resultTitle.textContent = result.title || 'Bez titulku';
+            resultTitle.href = result.url || '#';
+            resultTitle.target = '_blank';
+            resultTitle.rel = 'noopener noreferrer';
             
             // Vytvoření URL výsledku
             const resultUrl = document.createElement('div');
@@ -125,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (format === 'json') {
             // Formátování jako JSON
             content = JSON.stringify(searchResults, null, 2);
-            filename = `google-search-${searchResults.query.replace(/\\s+/g, '-')}.json`;
+            filename = `google-search-${searchResults.query.replace(/\s+/g, '-')}.json`;
             type = 'application/json';
         } else if (format === 'csv') {
             // Formátování jako CSV
@@ -141,9 +166,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     }).join(',');
                 })
             ];
-            content = csvRows.join('\
-');
-            filename = `google-search-${searchResults.query.replace(/\\s+/g, '-')}.csv`;
+            content = csvRows.join('\n');
+            filename = `google-search-${searchResults.query.replace(/\s+/g, '-')}.csv`;
             type = 'text/csv';
         } else {
             showError('Neplatný formát pro stažení');
