@@ -14,4 +14,4 @@ if (process.env.VERCEL) {
 }
 
 // Make the app available for Vercel 
-module.exports = require('./server');
+export { default } from "./server";

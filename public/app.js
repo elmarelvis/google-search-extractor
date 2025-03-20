@@ -64,52 +64,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // Funkce pro zobrazení výsledků vyhledávání
-    function displayResults(data) {
-        // Kontrola, zda máme nějaké výsledky
-        if (!data || !data.results || data.results.length === 0) {
-            resultsInfo.textContent = 'Nebyly nalezeny žádné výsledky';
-            resultsList.innerHTML = '';
+    async function handleSearch() {
+        const query = searchInput.value.trim();
+        
+        if (!query) {
+            showError('Zadejte prosím hledaný výraz');
             return;
         }
         
-        // Aktualizace informací o výsledcích
-        resultsInfo.textContent = `Nalezeno ${data.count} výsledků pro "${data.query}"`;
+        hideError();
+        showLoading();
+        resultsContainer.style.display = 'none';
         
-        // Vyčištění předchozích výsledků
-        resultsList.innerHTML = '';
-        
-        // Přidání každého výsledku do seznamu
-        data.results.forEach((result, index) => {
-            // Vytvoření elementu pro výsledek
-            const resultItem = document.createElement('div');
-            resultItem.className = 'result-item';
+        try {
+            // Fix: Use absolute URL for production environment
+            const apiUrl = window.location.hostname === 'localhost' 
+                ? `/api/search?q=${encodeURIComponent(query)}`
+                : `https://${window.location.host}/api/search?q=${encodeURIComponent(query)}`;
+    
+            const response = await fetch(apiUrl, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
             
-            // Vytvoření titulku výsledku s odkazem
-            const resultTitle = document.createElement('a');
-            resultTitle.className = 'result-title';
-            resultTitle.textContent = result.title || 'Bez titulku';
-            resultTitle.href = result.url || '#';
-            resultTitle.target = '_blank';
-            resultTitle.rel = 'noopener noreferrer';
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.error || `API error: ${response.status}`);
+            }
             
-            // Vytvoření URL výsledku
-            const resultUrl = document.createElement('div');
-            resultUrl.className = 'result-url';
-            resultUrl.textContent = result.url || 'Bez URL';
+            searchResults = await response.json();
+            displayResults(searchResults);
+            hideLoading();
+            resultsContainer.style.display = 'block';
             
-            // Vytvoření popisu výsledku
-            const resultDescription = document.createElement('div');
-            resultDescription.className = 'result-description';
-            resultDescription.textContent = result.description || 'Bez popisu';
-            
-            // Přidání všech částí do výsledku
-            resultItem.appendChild(resultTitle);
-            resultItem.appendChild(resultUrl);
-            resultItem.appendChild(resultDescription);
-            
-            // Přidání výsledku do seznamu
-            resultsList.appendChild(resultItem);
-        });
+        } catch (error) {
+            console.error('Search error:', error);
+            hideLoading();
+            showError('Nepodařilo se načíst výsledky vyhledávání');
+        }
     }
     
     // Funkce pro stažení výsledků
